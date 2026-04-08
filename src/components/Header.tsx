@@ -9,7 +9,7 @@ export default function Header() {
             Q
           </div>
           <span className="text-xl font-bold tracking-tight">
-            Quiz<span className="text-blue-300">ARD</span>
+            クイズラッシュ
           </span>
         </Link>
         <div className="flex items-center gap-3">

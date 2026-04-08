@@ -7,8 +7,7 @@ export const DEFAULT_THEMES = [
 ] as const;
 
 export const QUESTIONS_PER_REQUEST = 5;
-export const PARALLEL_REQUESTS = 4;
-export const TOTAL_QUESTIONS = QUESTIONS_PER_REQUEST * PARALLEL_REQUESTS; // 20
+export const PREFETCH_THRESHOLD = 5;
 
 export const LEVELS: Level[] = [
   { name: "神", minPercent: 100, color: "from-yellow-400 to-amber-500" },

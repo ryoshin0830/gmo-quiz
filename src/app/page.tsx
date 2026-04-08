@@ -43,12 +43,11 @@ export default function Home() {
           </div>
           <h1 className="text-5xl font-bold">
             <span className="bg-gradient-to-r from-[#003080] to-[#0046AC] bg-clip-text text-transparent">
-              Quiz
+              クイズラッシュ
             </span>
-            <span className="text-[#0046AC]/40">ARD</span>
           </h1>
           <p className="text-gray-500 text-sm">
-            テーマを選ぶだけ。AIが20問のクイズをリアルタイム生成。
+            テーマを選ぶだけ。AIがクイズをリアルタイム生成。
           </p>
         </div>
 

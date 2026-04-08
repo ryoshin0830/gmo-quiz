@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "QuizARD - AIリアルタイムクイズ",
+  title: "クイズラッシュ - AIリアルタイムクイズ",
   description: "GMOグループ研修 AIクイズアプリ",
 };
 

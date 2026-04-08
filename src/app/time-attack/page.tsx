@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { QuizQuestion } from "@/types/quiz";
+import { PREFETCH_THRESHOLD } from "@/lib/constants";
 
 const CHOICE_LABELS = ["A", "B", "C", "D"] as const;
 const CHOICE_KEYS = ["1", "2", "3", "4"] as const;
@@ -33,29 +34,44 @@ function TimeAttackContent() {
   const [showReview, setShowReview] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const questionsRef = useRef<QuizQuestion[]>([]);
+  const isFetchingRef = useRef(false);
+
+  // questionsRefを同期
+  useEffect(() => {
+    questionsRef.current = questions;
+  }, [questions]);
 
   // クイズ生成
   const fetchQuestions = useCallback(async () => {
-    const res = await fetch("/api/quiz/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ theme }),
-    });
-    const data = await res.json();
-    if (data.questions) {
-      setQuestions((prev) => [...prev, ...data.questions]);
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    try {
+      const existingQuestions = questionsRef.current.map((q) => q.question);
+      const res = await fetch("/api/quiz/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theme, existingQuestions }),
+      });
+      const data = await res.json();
+      if (data.questions) {
+        setQuestions((prev) => [...prev, ...data.questions]);
+        setLoading(false);
+      }
+    } finally {
+      isFetchingRef.current = false;
     }
   }, [theme]);
 
   // 初回ロード
   useEffect(() => {
     if (!theme) return;
-    fetchQuestions().then(() => setLoading(false));
+    fetchQuestions();
   }, [theme, fetchQuestions]);
 
-  // プリフェッチ: 残り5問になったら追加生成
+  // プリフェッチ: 残り10問になったら追加生成
   useEffect(() => {
-    if (questions.length - currentIndex <= 5 && !gameOver && !loading) {
+    if (questions.length - currentIndex <= PREFETCH_THRESHOLD && !gameOver && !loading) {
       fetchQuestions();
     }
   }, [currentIndex, questions.length, gameOver, loading, fetchQuestions]);
@@ -170,11 +186,30 @@ function TimeAttackContent() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center gap-4">
-        <div className="w-16 h-16 border-4 border-[#0046AC]/30 border-t-[#0046AC] rounded-full animate-spin" />
-        <p className="text-[#0046AC] font-medium text-lg">
-          タイムアタック準備中...
-        </p>
+      <div className="flex-1 flex flex-col items-center justify-center gap-8 p-4">
+        <div className="text-center space-y-2">
+          <p className="text-sm text-gray-400 font-medium">テーマ</p>
+          <p className="text-2xl font-bold text-[#0046AC]">{theme}</p>
+        </div>
+
+        <div className="flex gap-1.5">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="w-3 h-3 bg-[#0046AC] rounded-full animate-bounce"
+              style={{ animationDelay: `${i * 0.15}s` }}
+            />
+          ))}
+        </div>
+
+        <div className="text-center space-y-1">
+          <p className="text-gray-600 font-medium">
+            AIがクイズを準備中...
+          </p>
+          <p className="text-xs text-gray-400">
+            制限時間 {duration}秒のタイムアタック
+          </p>
+        </div>
       </div>
     );
   }
@@ -286,17 +321,6 @@ function TimeAttackContent() {
               className="flex-1 py-3 bg-[#0046AC]/80 text-white rounded-xl font-medium hover:bg-[#0046AC] cursor-pointer"
             >
               ランキング
-            </button>
-            <button
-              onClick={() => {
-                router.push(
-                  `/time-attack?theme=${encodeURIComponent(theme)}&duration=${duration}`
-                );
-                router.refresh();
-              }}
-              className="flex-1 py-3 bg-[#0046AC] text-white rounded-xl font-medium hover:bg-[#003080] cursor-pointer"
-            >
-              再挑戦
             </button>
           </div>
         </div>
