@@ -7,7 +7,6 @@ import { DEFAULT_THEMES } from "@/lib/constants";
 export default function Home() {
   const [customTheme, setCustomTheme] = useState("");
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<"normal" | "timeattack">("normal");
   const [duration, setDuration] = useState(60);
   const [savedThemes, setSavedThemes] = useState<string[]>([]);
   const router = useRouter();
@@ -28,13 +27,9 @@ export default function Home() {
       localStorage.setItem("savedThemes", JSON.stringify(updated));
     }
 
-    if (mode === "timeattack") {
-      router.push(
-        `/time-attack?theme=${encodeURIComponent(theme.trim())}&duration=${duration}`
-      );
-    } else {
-      router.push(`/quiz?theme=${encodeURIComponent(theme.trim())}`);
-    }
+    router.push(
+      `/time-attack?theme=${encodeURIComponent(theme.trim())}&duration=${duration}`
+    );
   };
 
   return (
@@ -57,48 +52,22 @@ export default function Home() {
           </p>
         </div>
 
-        {/* モード切り替え */}
-        <div className="flex gap-1.5 glass-card rounded-xl p-1.5 shadow-sm">
-          <button
-            onClick={() => setMode("normal")}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-              mode === "normal"
-                ? "bg-[#0046AC] text-white shadow-md shadow-blue-500/25"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            📝 通常モード
-          </button>
-          <button
-            onClick={() => setMode("timeattack")}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-              mode === "timeattack"
-                ? "bg-[#0046AC] text-white shadow-md shadow-blue-500/25"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            ⏱️ タイムアタック
-          </button>
+        {/* 制限時間設定 */}
+        <div className="flex gap-2 justify-center">
+          {[60, 90].map((sec) => (
+            <button
+              key={sec}
+              onClick={() => setDuration(sec)}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
+                duration === sec
+                  ? "bg-[#0046AC] text-white shadow-md shadow-blue-500/25"
+                  : "glass-card text-gray-600 hover:border-[#0046AC]"
+              }`}
+            >
+              ⏱️ {sec}秒
+            </button>
+          ))}
         </div>
-
-        {/* タイムアタック設定 */}
-        {mode === "timeattack" && (
-          <div className="flex gap-2 justify-center animate-fade-in">
-            {[60, 90].map((sec) => (
-              <button
-                key={sec}
-                onClick={() => setDuration(sec)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
-                  duration === sec
-                    ? "bg-[#0046AC] text-white shadow-md shadow-blue-500/25"
-                    : "glass-card text-gray-600 hover:border-[#0046AC]"
-                }`}
-              >
-                {sec}秒
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* デフォルトテーマ */}
         <div className="space-y-3">
