@@ -26,8 +26,6 @@ function TimeAttackContent() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [penaltyFlash, setPenaltyFlash] = useState(false);
-  const [playerName, setPlayerName] = useState("");
-  const [saved, setSaved] = useState(false);
   const [answeredHistory, setAnsweredHistory] = useState<
     { question: QuizQuestion; selectedIndex: number; isCorrect: boolean }[]
   >([]);
@@ -159,23 +157,6 @@ function TimeAttackContent() {
     };
   }, []);
 
-  // ランキング保存
-  const saveRanking = () => {
-    if (!playerName.trim()) return;
-    const rankings = JSON.parse(localStorage.getItem("timeAttackRankings") || "[]");
-    rankings.push({
-      playerName: playerName.trim(),
-      theme,
-      correctCount,
-      totalAnswered,
-      duration,
-      date: new Date().toISOString(),
-    });
-    rankings.sort((a: { correctCount: number }, b: { correctCount: number }) => b.correctCount - a.correctCount);
-    localStorage.setItem("timeAttackRankings", JSON.stringify(rankings.slice(0, 100)));
-    setSaved(true);
-  };
-
   if (!theme) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -226,30 +207,6 @@ function TimeAttackContent() {
             <p className="text-gray-500">正解数（{totalAnswered}問中）</p>
             <p className="text-sm text-gray-400">正答率: {accuracy}%</p>
 
-            {!saved ? (
-              <div className="space-y-3 pt-4 border-t">
-                <p className="text-sm font-medium text-gray-600">ランキングに登録</p>
-                <input
-                  type="text"
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="名前を入力"
-                  className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 focus:border-[#0046AC] focus:outline-none"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") saveRanking();
-                  }}
-                />
-                <button
-                  onClick={saveRanking}
-                  disabled={!playerName.trim()}
-                  className="w-full py-2 bg-[#0046AC] text-white rounded-lg font-medium disabled:opacity-50 cursor-pointer"
-                >
-                  登録
-                </button>
-              </div>
-            ) : (
-              <p className="text-green-600 font-medium pt-4">✅ ランキングに登録しました！</p>
-            )}
           </div>
 
           {/* 振り返りトグル */}
@@ -309,20 +266,12 @@ function TimeAttackContent() {
             </div>
           )}
 
-          <div className="flex gap-3">
-            <button
-              onClick={() => router.push("/")}
-              className="flex-1 py-3 border-2 border-[#0046AC] text-[#0046AC] rounded-xl font-medium hover:bg-blue-50 cursor-pointer"
-            >
-              ホーム
-            </button>
-            <button
-              onClick={() => router.push(`/ranking`)}
-              className="flex-1 py-3 bg-[#0046AC]/80 text-white rounded-xl font-medium hover:bg-[#0046AC] cursor-pointer"
-            >
-              ランキング
-            </button>
-          </div>
+          <button
+            onClick={() => router.push("/")}
+            className="w-full py-3 border-2 border-[#0046AC] text-[#0046AC] rounded-xl font-medium hover:bg-blue-50 cursor-pointer"
+          >
+            ホーム
+          </button>
         </div>
       </div>
     );

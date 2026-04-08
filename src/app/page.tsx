@@ -143,16 +143,6 @@ export default function Home() {
           </form>
         </div>
 
-        {/* ランキングリンク */}
-        <div className="text-center pt-2">
-          <button
-            onClick={() => router.push("/ranking")}
-            className="text-sm text-[#0046AC]/60 hover:text-[#0046AC] transition-colors cursor-pointer"
-          >
-            🏆 ランキングを見る
-          </button>
-        </div>
-
         {loading && (
           <div className="text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 glass-card rounded-full text-[#0046AC] text-sm">
